@@ -3,3 +3,9 @@ Build around [Variety](https://github.com/varietywalls/variety), giving you a mo
 
 Only tested on Fedora, it should work on Gnome Desktop.
 
+# Dependencies
+1. [retry](https://github.com/nlpsuge/retry)
+2. A holiday datasource on Github
+
+# TODO
+
