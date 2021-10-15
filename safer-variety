@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+holiday_data_dir="$(dirname "$1")"
+
+holiday_data="$1"
+
+today_date="$(date +"%Y-%m-%d")"
+
+safe_mode=True
+
+is_work_day(){
+    week_date="$(date +%a)"
+    if [ "Sun" == $week_date -o "Sat" == $week_date ]; then
+        echo "False"
+    else
+        echo "True"
+    fi
+}
+
+gsettings set org.gnome.desktop.background picture-uri "/usr/share/backgrounds/fedora-workstation/corn.jpg" 2> /dev/null
+
+retry git -C "$holiday_data_dir" pull -p
+
+if [ -e "$holiday_data" ]; then
+    if [ x"$(is_work_day)" == x"False" ]; then
+          safe_mode=False
+    fi
+    
+    count=$(jq '.days[].date' "$holiday_data" | wc -l)
+    for ((i=0;i<"$count";i++)); do
+       date=$(jq ".days[$i].date" "$holiday_data")
+       isOffDay=$(jq ".days[$i].isOffDay" "$holiday_data")
+       if [ x"\"$today_date\"" == x"$date" ]; then
+    	  if [ x"$isOffDay" == x"true" ]; then
+                  safe_mode=False
+              else
+                  safe_mode=True
+    	  fi
+    	  break
+       fi
+    done
+fi
+
+echo "Stepping into safe mode: $safe_mode"
+
+if [ $safe_mode == "True" ]; then
+    variety --profile=safe
+else
+    variety
+fi
